@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 生产模式前端（Nginx）
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:80"
+  #   volumes:
+  #     - ./frontend:/app
+  #   depends_on:
+  #     - backend
+
+  # 开发模式前端（Vite 热重载）
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        - BASE_IMAGE=pytorch/pytorch:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/data:/app/data
+      - ./backend/models:/app/models
+    environment:
+      - DATABASE_URL=sqlite:///./data/annotation.db
+      - SECRET_KEY=poc-secret-key-2024
